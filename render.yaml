@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: jarvis-frontend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npx vite preview --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_BACKEND
+        value: bridge
+      - key: VITE_BRIDGE_URL
+        value: wss://jarvis-bridge.onrender.com
+      - key: VITE_GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: jarvis-bridge
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: JARVIS_BRIDGE_PORT=$PORT JARVIS_ALLOWED_ORIGINS=https://jarvis-frontend.onrender.com node bridge/server.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JARVIS_ALLOW_WRITES
+        value: "0"
+      - key: JARVIS_ALLOWED_ORIGINS
+        value: https://jarvis-frontend.onrender.com
